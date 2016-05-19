@@ -171,6 +171,7 @@ public class serverProgII extends Frame
 	public void setupConnection() throws IOException
 	{
 		System.out.println("SERVER MODE ACTIVATED");
+	
 		server = new ServerSocket (8000);  						//create the socket at port 8000
 		System.out.println("Waiting For Connection...");
 		connection = server.accept();							//wait for a connection

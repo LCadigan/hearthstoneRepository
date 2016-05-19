@@ -1,9 +1,12 @@
 package com.milton.hearthstone.Hearthstone;
 
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.awt.Image;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-
+import java.io.*;
 import javax.swing.tree.VariableHeightLayoutCache;
 
 import org.json.JSONArray;
@@ -11,6 +14,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.omg.CORBA.PUBLIC_MEMBER;
 import org.w3c.dom.CharacterData;
+
+import java.awt.event.*;
+//import java.io.*;
+import java.applet.Applet;
+import java.util.*;
+
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -21,16 +30,27 @@ import com.mashape.unirest.http.exceptions.UnirestException;
  * Hello world!
  *
  */
-public class App 
+public class App  extends Frame
 {
+	public  SaveLoad sl;
+	public JunkFile[] loader; // an array of junkFile
+	
+	public JunkFile[] saver;
+	public int counter=0;
+	
 	public static ArrayList<Card> allCards= new ArrayList<Card>();
+	 
     public static void main( String[] args )
     {
-       
+    	new serverProgII();
         addAllCards();
+        
        
-        System.out.println(allCards.get(60).manaCost);
-        System.out.println("Cards: " +allCards.size());
+    	//makeCard()
+       
+        //System.out.println(allCards.get(60).manaCost);
+        //System.out.println("Cards: " +allCards.size());
+        //System.out.println(cardNames.size());;
     }
     
     public static void addAllCards(){
@@ -49,6 +69,7 @@ public class App
         		//System.out.println(responseString.substring(lastFind+6,responseString.indexOf(",",lastFind+7)-1));
         		//makeCard("Aldor Peacekeeper");
         		String nextCard = responseString.substring(lastFind+6,responseString.indexOf(",",lastFind+6)).trim().replaceAll("\"","");
+        		
         		makeCard(nextCard);
                 
 
@@ -154,4 +175,65 @@ public class App
     	
    
     }
+    public void savearray(JunkFile s[])
+	{
+		String fileName = "";
+		String dir = "C:/windows/desktop";
+
+
+		FileDialog fdS = new FileDialog(this, "SAVE", FileDialog.SAVE);
+		fdS.show();
+		fileName = fdS.getFile();
+		dir = fdS.getDirectory();
+
+
+		try
+		{
+			FileOutputStream fos=new FileOutputStream(dir + fileName);
+			ObjectOutputStream oos=new ObjectOutputStream(fos);
+			oos.writeObject(s);
+			oos.flush();
+
+			fos.close();
+		}
+		catch(IOException e)
+		{
+			System.out.println("did not save");
+
+		}
+
+
+	}
+    public void loadarray()
+	{
+		String fileName = "";
+		String dir = "C:/windows/desktop";
+		FileDialog fdL = new FileDialog(this, "load me", FileDialog.LOAD);
+		fdL.show();
+		fileName = fdL.getFile();
+		dir = fdL.getDirectory();
+
+		FileInputStream fis;
+		try
+		{
+			fis = new FileInputStream(dir + fileName);
+			ObjectInputStream ois=new ObjectInputStream(fis);
+			JunkFile b[] = (JunkFile[])ois.readObject();
+			loader=new JunkFile[b.length];
+			loader=b;
+			fis.close();
+
+		}
+		catch(IOException e)
+		{
+			System.out.println("IOException");
+			System.out.println(e);
+		}
+		catch(ClassNotFoundException e)
+		{
+			System.out.println("Class not found");
+		}
+
+
+	}
 }
