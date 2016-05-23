@@ -14,6 +14,8 @@ public class JunkFile implements java.io.Serializable
 	public int size=10;
 	public int canvX,canvY, myNum;
 	public int fontSize=10;
+	public int mana, attack, health, durability;
+	public String cardType, text, playerClass, name, pic,rarity, race;
 
 
 public JunkFile(int x, int y)
@@ -33,5 +35,19 @@ public JunkFile(int x, int y)
 
 		junkRec= new Rectangle(rx-cx,ry-cy-fontSize,size,size);
 
+	}
+	public JunkFile(String tCardType, int tMana, String tText, String tPlayerClass, String tName, int tAttack, int tHealth, int tDurability,String tPic, String tRarity, String tRace){
+		cardType=tCardType;
+		mana=tMana;
+		text=tText;
+		playerClass=tPlayerClass;
+		name=tName;
+		attack=tAttack;
+		health=tHealth;
+		durability=tDurability;
+		pic=tPic;
+		rarity=tRarity;
+		race= tRace;
+		
 	}
 }

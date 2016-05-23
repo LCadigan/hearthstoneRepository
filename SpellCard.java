@@ -4,13 +4,15 @@ import java.awt.Image;
 
 public class SpellCard extends Card {
 
-	public SpellCard(/*int pMana, String pText, Image pPic, String pPlayerClass, String pName*/) {
-	/*manaCost=pMana;
+	public SpellCard(int pMana, String pText, String pPic, String pPlayerClass, String pName, String pRarity, String pRace) {
+	manaCost=pMana;
 	text=pText;
 	pic=pPic;
 	playerClass=pPlayerClass;
-	name=pName;*/
+	name=pName;
 	cardType="spell";
+	rarity= pRarity;
+	race= pRace;
 	
 	}
 

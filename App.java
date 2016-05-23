@@ -7,6 +7,8 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.io.*;
+import java.rmi.server.LoaderHandler;
+
 import javax.swing.tree.VariableHeightLayoutCache;
 
 import org.json.JSONArray;
@@ -33,27 +35,77 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 public class App  extends Frame
 {
 	public  SaveLoad sl;
-	public JunkFile[] loader; // an array of junkFile
+	public  JunkFile[] loader; // an array of junkFile
 	
 	public JunkFile[] saver;
 	public int counter=0;
 	
-	public static ArrayList<Card> allCards= new ArrayList<Card>();
+	public  ArrayList<MinionCard> minionCards= new ArrayList<MinionCard>();
+	public ArrayList<SpellCard> spellCards = new ArrayList<SpellCard>();
+	public ArrayList<WeaponCard> weaponCards = new ArrayList<WeaponCard>();
+	public ArrayList<Card> allCards = new ArrayList<Card>();
+	
 	 
     public static void main( String[] args )
     {
-    	new serverProgII();
-        addAllCards();
+    	//new serverProgII();
         
+    	App a= new App();
+    	
+    	a.addAllCards();
+    	System.out.println("Cards made");
+    	System.out.println(a.allCards.size());
+    	JunkFile[] saveCards = new JunkFile[a.allCards.size()];
+    	
+        for(int x=0;x<a.allCards.size();x++)
+        {
+        	JunkFile card = new JunkFile(a.allCards.get(x).cardType, a.allCards.get(x).manaCost, a.allCards.get(x).text, a.allCards.get(x).playerClass, a.allCards.get(x).name, a.allCards.get(x).attack, a.allCards.get(x).health, a.allCards.get(x).durability, a.allCards.get(x).pic, a.allCards.get(x).rarity, a.allCards.get(x).race);
+        	saveCards[x]= card;
+        }
+        System.out.println("Saving now");
+        a.savearray(saveCards);
+        
+        System.out.println("Saved");
+    	/*a.loadarray();
+    	System.out.println(a.loader.length);
+    	for(int i=0; i<a.loader.length; i++)
+    	{
+    		System.out.println(a.loader[i].cardType);
+    		//Syste
+    		if(a.loader[i].cardType.equals("Minion"))
+    		{
+    			//System.out.println("test");
+    			MinionCard minion = new MinionCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].health, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
+    			a.minionCards.add(minion);
+    		}
+    		if(a.loader[i].cardType.equals("Spell"))
+    		{
+    			SpellCard spell = new SpellCard(a.loader[i].mana, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
+    			a.spellCards.add(spell);
+    		}
+    		if(a.loader[i].cardType.equals("Weapon"))
+    		{
+    			WeaponCard weapon = new WeaponCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].durability, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
+    			a.weaponCards.add(weapon);
+    		}
+    		
+    	}
+    	System.out.println("minions " + a.minionCards.size());
+    	System.out.println("spells " + a.spellCards.size());
+    	System.out.println("weapons " + a.weaponCards.size());
+    	System.out.println(a.minionCards.get(16).name + ": "+ a.minionCards.get(16).text);
+    	System.out.println(a.spellCards.get(101).name + ": " + a.spellCards.get(101).text);
+    	System.out.println(a.weaponCards.get(16).name + ": " + a.weaponCards.get(16).text);*/
+    	
        
-    	//makeCard()
+    	
        
-        //System.out.println(allCards.get(60).manaCost);
+       
         //System.out.println("Cards: " +allCards.size());
-        //System.out.println(cardNames.size());;
+        
     }
     
-    public static void addAllCards(){
+    public  void addAllCards(){
     	try{
         	HttpResponse<JsonNode> response = Unirest.get("https://irythia-hs.p.mashape.com/cards")
         			.header("X-Mashape-Key", "9yOy2AJsEkmshk9xN3TLFYgjaY7zp1LBLOqjsnTCqv7f9fzvbM")
@@ -85,7 +137,7 @@ public class App  extends Frame
     }
     
     
-    public static void makeCard(String card)
+    public  void makeCard(String card)
     {
     	card.replaceAll(" ", "%");
     	//System.out.println("testing " +card);
@@ -108,17 +160,20 @@ public class App  extends Frame
 				if(object.get("type").equals("Minion"))
 						{
 					
-					MinionCard mCard = new MinionCard();
+					MinionCard mCard = new MinionCard(i, i, i, card, card, card, card, card, card);
 					mCard.attack=(Integer) object.get("attack");
 					mCard.health=(Integer) object.get("health");
 					try{
 					mCard.playerClass=(String) object.get("playerClass");
 					}catch(JSONException e){}
 					
-					//mCard.pic=(Image) object.get("img");
+					
 					mCard.name=(String) object.get("name");
 					mCard.cardType=(String)object.get("type");
 					mCard.manaCost=(Integer) object.get("cost");
+					mCard.pic=(String) object.getString("img"); 
+					mCard.race=(String) object.getString("race");
+					mCard.rarity=(String) object.getString("rarity");
 					try{
 					mCard.text= (String) object.get("text");
 					}catch(JSONException e){}
@@ -129,29 +184,35 @@ public class App  extends Frame
 			    if(object.get("type").equals("Spell"))
 			    {
 			    	
-			    	SpellCard sCard = new SpellCard();
+			    	SpellCard sCard = new SpellCard(i, card, card, card, card, card, card);
 			    		
 			    	sCard.playerClass=(String) object.get("playerClass");
-					//sCard.pic=(Image) object.get("img");
+					
 					sCard.name=(String) object.get("name");
 					sCard.cardType=(String)object.get("type");
 					sCard.manaCost=(Integer) object.get("cost");
-					sCard.text= (String) object.get("text");				
+					sCard.text= (String) object.get("text");	
+					sCard.pic=(String) object.getString("img"); 
+					sCard.race=(String) object.getString("race");
+					sCard.rarity=(String) object.getString("rarity");
 					//System.out.println("IT WORKED, cost = " + sCard.manaCost);
 					allCards.add(sCard);
 			    }
 			    if(object.get("type").equals("Weapon"))
 			    		{
 			    	try{
-			    		
-			    	WeaponCard wCard=new WeaponCard();
+			    	//	
+			    	WeaponCard wCard=new WeaponCard(i, i, i, card, card, card, card, card, card);
 			    	wCard.attack=(Integer) object.get("attack");
 					wCard.durability=(Integer) object.get("durability");
 			    	wCard.playerClass=(String) object.get("playerClass");
-					//wCard.pic=(Image) object.get("img");
+					
 					wCard.name=(String) object.get("name");
 					wCard.cardType=(String)object.get("type");
 					wCard.manaCost=(Integer) object.get("cost");
+					wCard.pic=(String) object.getString("img"); 
+					wCard.race=(String) object.getString("race");
+					wCard.rarity=(String) object.getString("rarity");
 					try{
 					wCard.text= (String) object.get("text");
 			    	}catch(JSONException e){}
@@ -175,7 +236,7 @@ public class App  extends Frame
     	
    
     }
-    public void savearray(JunkFile s[])
+    public  void savearray(JunkFile s[])
 	{
 		String fileName = "";
 		String dir = "C:/windows/desktop";
@@ -204,7 +265,7 @@ public class App  extends Frame
 
 
 	}
-    public void loadarray()
+    public  void loadarray()
 	{
 		String fileName = "";
 		String dir = "C:/windows/desktop";
