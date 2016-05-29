@@ -4,7 +4,7 @@ import java.awt.Image;
 
 public class SpellCard extends Card {
 
-	public SpellCard(int pMana, String pText, String pPic, String pPlayerClass, String pName, String pRarity, String pRace) {
+	public SpellCard(int pMana, String pText, String pPic, String pPlayerClass, String pName, String pRarity) {
 	manaCost=pMana;
 	text=pText;
 	pic=pPic;
@@ -12,7 +12,7 @@ public class SpellCard extends Card {
 	name=pName;
 	cardType="spell";
 	rarity= pRarity;
-	race= pRace;
+	
 	
 	}
 

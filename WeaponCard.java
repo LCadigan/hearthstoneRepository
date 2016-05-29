@@ -7,7 +7,7 @@ import java.util.StringTokenizer;
 public class WeaponCard extends Card {
 	
 
-	public WeaponCard(int pMana, int pAttack, int pDurability, String pText, String pPic, String pPlayerClass, String pName, String pRarity, String pRace) {
+	public WeaponCard(int pMana, int pAttack, int pDurability, String pText, String pPic, String pPlayerClass, String pName, String pRarity) {
 	manaCost=pMana;
 	attack=pAttack;
 	durability=pDurability;
@@ -17,7 +17,7 @@ public class WeaponCard extends Card {
 	name=pName;
 	cardType="weapon";
 	rarity= pRarity;
-	race= pRace;
+	
 	
 	
 		

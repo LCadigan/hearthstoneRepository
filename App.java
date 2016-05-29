@@ -1,9 +1,12 @@
 package com.milton.hearthstone.Hearthstone;
 
 import java.awt.FileDialog;
-import java.awt.Frame;
-import java.awt.Image;
 
+
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Transparency;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.io.*;
@@ -28,11 +31,22 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import java.awt.Canvas;
+import java.awt.CardLayout; 
+import java.awt.Color; 
+import java.awt.FlowLayout; 
+import java.awt.Graphics; 
+import javax.swing.JButton; 
+import javax.swing.JComponent; 
+import javax.swing.JFrame; 
+import javax.swing.JLabel; 
+import javax.swing.SwingUtilities;
+
 /**
  * Hello world!
  *
  */
-public class App  extends Frame
+public class App  extends Frame implements Runnable
 {
 	public  SaveLoad sl;
 	public  JunkFile[] loader; // an array of junkFile
@@ -44,15 +58,27 @@ public class App  extends Frame
 	public ArrayList<SpellCard> spellCards = new ArrayList<SpellCard>();
 	public ArrayList<WeaponCard> weaponCards = new ArrayList<WeaponCard>();
 	public ArrayList<Card> allCards = new ArrayList<Card>();
-	
+	//public Image offImage= createImage(bounds().width,bounds().height);
+	//public Graphics offScreen=offImage.getGraphics();
+	   public boolean isTaunt =false; 
+	   public int yourMana =0; 
+	   public Card[] deck = new Card[30];
+	   public Card[] cardArray = new Card[14];
+	   public JButton[] cardButtons= new JButton[14];
+	   public HearthCanvas canvas = new HearthCanvas();
+	   Thread thread;
+	  // public Image board= new Image
 	 
     public static void main( String[] args )
     {
     	//new serverProgII();
         
     	App a= new App();
-    	
-    	a.addAllCards();
+    	 a.show();	
+    	 a.resize(600,600);
+    	a.thread = new Thread(a);  
+       a.thread.start();
+    	/*a.addAllCards();
     	System.out.println("Cards made");
     	System.out.println(a.allCards.size());
     	JunkFile[] saveCards = new JunkFile[a.allCards.size()];
@@ -65,8 +91,9 @@ public class App  extends Frame
         System.out.println("Saving now");
         a.savearray(saveCards);
         
-        System.out.println("Saved");
-    	/*a.loadarray();
+        System.out.println("Saved");*/
+        
+    	a.loadarray();
     	System.out.println(a.loader.length);
     	for(int i=0; i<a.loader.length; i++)
     	{
@@ -80,12 +107,12 @@ public class App  extends Frame
     		}
     		if(a.loader[i].cardType.equals("Spell"))
     		{
-    			SpellCard spell = new SpellCard(a.loader[i].mana, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
+    			SpellCard spell = new SpellCard(a.loader[i].mana, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity);
     			a.spellCards.add(spell);
     		}
     		if(a.loader[i].cardType.equals("Weapon"))
     		{
-    			WeaponCard weapon = new WeaponCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].durability, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
+    			WeaponCard weapon = new WeaponCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].durability, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity);
     			a.weaponCards.add(weapon);
     		}
     		
@@ -93,9 +120,9 @@ public class App  extends Frame
     	System.out.println("minions " + a.minionCards.size());
     	System.out.println("spells " + a.spellCards.size());
     	System.out.println("weapons " + a.weaponCards.size());
-    	System.out.println(a.minionCards.get(16).name + ": "+ a.minionCards.get(16).text);
+    	System.out.println(a.minionCards.get(5).name + ": "+ a.minionCards.get(5).race);
     	System.out.println(a.spellCards.get(101).name + ": " + a.spellCards.get(101).text);
-    	System.out.println(a.weaponCards.get(16).name + ": " + a.weaponCards.get(16).text);*/
+    	System.out.println(a.weaponCards.get(16).name + ": " + a.weaponCards.get(16).text);
     	
        
     	
@@ -103,6 +130,62 @@ public class App  extends Frame
        
         //System.out.println("Cards: " +allCards.size());
         
+    }
+    public void createCanvas(){
+        for(int i =0; i<14;i++){
+	         cardButtons[i] = new JButton(i+"");
+        }
+   }
+    
+    public void playCard(int clickNum, Card playCard){
+    	//note: must make sure we do not replay card, play card twice
+    //note: break up effects by period
+    if(yourMana>playCard.manaCost){
+    cardArray[clickNum]=playCard;
+    	if(cardArray[clickNum].text.contains("Battlecry")){
+    		int startInt = cardArray[clickNum].text.indexOf("Battlecry"+10);
+    doEffect(cardArray[clickNum].text.substring(startInt, cardArray[clickNum].text.indexOf(".",startInt)));
+    
+    	}
+    	cardArray[clickNum].canAttack = cardArray[clickNum].text.contains("Charge") ? true: false; 
+
+    }
+    }
+    public void doEffect(String pString){
+    	
+    	   System.out.println("doEffect: "+pString);
+    	   
+    	   sendString("attack(0,14)");
+    	   if(pString.contains("attack")){
+    		   int startInt=Integer.parseInt(pString.substring(pString.indexOf("(")+1,-1+pString.indexOf(",")));
+      		 
+    		   int endInt=Integer.parseInt(pString.substring(pString.indexOf(",")+1,-1+pString.indexOf(")")));
+    		  attack(startInt,endInt);
+    	   }
+    	      if(pString.contains("all minions")){}
+    	      else if(pString.contains("a friendly minion")){}
+    	      	if(pString.contains("a minion")){}
+    	      	//for effect
+    	      		if(pString.contains("give")){}
+    	      		if(pString.contains("Taunt")){}
+    	      }
+
+    public void attack(int aNum, int dNum){
+    	cardArray[aNum].health-=cardArray[dNum].attack;
+    	cardArray[dNum].health-=cardArray[aNum].attack;
+    	if(cardArray[aNum].health<1){
+    		cardArray[aNum]=null;
+    	}
+    	if(cardArray[dNum].health<1){
+    		cardArray[dNum]=null;
+    	}
+
+    		//set num to -1, to indicate not to attack
+    	int attackerNum=(-1);
+    	}
+    
+    public void sendString(String pString){
+    	System.out.println(pString);
     }
     
     public  void addAllCards(){
@@ -156,10 +239,10 @@ public class App  extends Frame
 			
 			for(int i=0;i<array.length(); i++){
 				JSONObject object = array.getJSONObject(i);
-				
+				//System.out.println(object.get("name"));
 				if(object.get("type").equals("Minion"))
 						{
-					
+					//MinionCard mCard= new MinionCard((Integer) object.get("cost"), (Integer) object.get("attack"), (Integer) object.get("health"),(String) object.get("text"), (String) object.getString("img"), (String) object.get("playerClass"), (String) object.get("name"), (String) object.getString("rarity"), (String) object.getString("race"));
 					MinionCard mCard = new MinionCard(i, i, i, card, card, card, card, card, card);
 					mCard.attack=(Integer) object.get("attack");
 					mCard.health=(Integer) object.get("health");
@@ -172,7 +255,9 @@ public class App  extends Frame
 					mCard.cardType=(String)object.get("type");
 					mCard.manaCost=(Integer) object.get("cost");
 					mCard.pic=(String) object.getString("img"); 
+					try{
 					mCard.race=(String) object.getString("race");
+					}catch(JSONException e){}
 					mCard.rarity=(String) object.getString("rarity");
 					try{
 					mCard.text= (String) object.get("text");
@@ -184,7 +269,7 @@ public class App  extends Frame
 			    if(object.get("type").equals("Spell"))
 			    {
 			    	
-			    	SpellCard sCard = new SpellCard(i, card, card, card, card, card, card);
+			    	SpellCard sCard = new SpellCard(i, card, card, card, card, card);
 			    		
 			    	sCard.playerClass=(String) object.get("playerClass");
 					
@@ -193,8 +278,9 @@ public class App  extends Frame
 					sCard.manaCost=(Integer) object.get("cost");
 					sCard.text= (String) object.get("text");	
 					sCard.pic=(String) object.getString("img"); 
-					sCard.race=(String) object.getString("race");
+					try{
 					sCard.rarity=(String) object.getString("rarity");
+					}catch(JSONException e){}
 					//System.out.println("IT WORKED, cost = " + sCard.manaCost);
 					allCards.add(sCard);
 			    }
@@ -202,7 +288,7 @@ public class App  extends Frame
 			    		{
 			    	try{
 			    	//	
-			    	WeaponCard wCard=new WeaponCard(i, i, i, card, card, card, card, card, card);
+			    	WeaponCard wCard=new WeaponCard(i, i, i, card, card, card, card, card );
 			    	wCard.attack=(Integer) object.get("attack");
 					wCard.durability=(Integer) object.get("durability");
 			    	wCard.playerClass=(String) object.get("playerClass");
@@ -211,8 +297,9 @@ public class App  extends Frame
 					wCard.cardType=(String)object.get("type");
 					wCard.manaCost=(Integer) object.get("cost");
 					wCard.pic=(String) object.getString("img"); 
-					wCard.race=(String) object.getString("race");
+					try{
 					wCard.rarity=(String) object.getString("rarity");
+					}catch(JSONException e){}
 					try{
 					wCard.text= (String) object.get("text");
 			    	}catch(JSONException e){}
@@ -267,17 +354,18 @@ public class App  extends Frame
 	}
     public  void loadarray()
 	{
-		String fileName = "";
+		/*String fileName = "";
 		String dir = "C:/windows/desktop";
 		FileDialog fdL = new FileDialog(this, "load me", FileDialog.LOAD);
 		fdL.show();
 		fileName = fdL.getFile();
-		dir = fdL.getDirectory();
+		dir = fdL.getDirectory();*/
 
 		FileInputStream fis;
 		try
 		{
-			fis = new FileInputStream(dir + fileName);
+			//System.out.println(dir + fileName);
+			fis = new FileInputStream("/Users/Will/Desktop/HS Card");
 			ObjectInputStream ois=new ObjectInputStream(fis);
 			JunkFile b[] = (JunkFile[])ois.readObject();
 			loader=new JunkFile[b.length];
@@ -297,4 +385,24 @@ public class App  extends Frame
 
 
 	}
-}
+    public void paint(Graphics g)
+    {
+    	
+    }
+    
+    public void run(){
+    	while(true){
+    		
+    		canvas.paint(getGraphics());
+    		
+    		
+    		try {
+                thread.sleep(50);
+             }
+             catch (Exception e){ }
+          }//while
+       
+       }// run
+    	
+    }
+
