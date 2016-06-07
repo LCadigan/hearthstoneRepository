@@ -16,6 +16,7 @@ public int durability;
 public String rarity;
 public String race;
 public boolean canAttack=false;
+public int indexNum=0;
 
 public void playCard()
 {

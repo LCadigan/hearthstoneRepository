@@ -5,6 +5,7 @@ import java.awt.FileDialog;
 
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.util.ArrayList;
@@ -39,7 +40,8 @@ import java.awt.Graphics;
 import javax.swing.JButton; 
 import javax.swing.JComponent; 
 import javax.swing.JFrame; 
-import javax.swing.JLabel; 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -62,12 +64,12 @@ public class App  extends Frame implements Runnable
 	//public Graphics offScreen=offImage.getGraphics();
 	   public boolean isTaunt =false; 
 	   public int yourMana =0; 
-	   public Card[] deck = new Card[30];
+	   public ArrayList<Card> deck = new ArrayList<Card>();
 	   public Card[] cardArray = new Card[14];
 	   public JButton[] cardButtons= new JButton[14];
 	   public HearthCanvas canvas = new HearthCanvas();
 	   Thread thread;
-	  // public Image board= new Image
+	    //public String img = minionCards.get(5).pic;
 	 
     public static void main( String[] args )
     {
@@ -104,27 +106,36 @@ public class App  extends Frame implements Runnable
     			//System.out.println("test");
     			MinionCard minion = new MinionCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].health, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity, a.loader[i].race);
     			a.minionCards.add(minion);
+    			a.allCards.add(minion);
     		}
     		if(a.loader[i].cardType.equals("Spell"))
     		{
     			SpellCard spell = new SpellCard(a.loader[i].mana, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity);
     			a.spellCards.add(spell);
+    			a.allCards.add(spell);
     		}
     		if(a.loader[i].cardType.equals("Weapon"))
     		{
     			WeaponCard weapon = new WeaponCard(a.loader[i].mana, a.loader[i].attack, a.loader[i].durability, a.loader[i].text, a.loader[i].pic, a.loader[i].playerClass, a.loader[i].name, a.loader[i].rarity);
     			a.weaponCards.add(weapon);
+    			a.allCards.add(weapon);
     		}
     		
     	}
     	System.out.println("minions " + a.minionCards.size());
     	System.out.println("spells " + a.spellCards.size());
     	System.out.println("weapons " + a.weaponCards.size());
+    	System.out.println("total: " + a.allCards.size());
     	System.out.println(a.minionCards.get(5).name + ": "+ a.minionCards.get(5).race);
     	System.out.println(a.spellCards.get(101).name + ": " + a.spellCards.get(101).text);
     	System.out.println(a.weaponCards.get(16).name + ": " + a.weaponCards.get(16).text);
-    	
-       
+    	System.out.println(a.minionCards.get(5).pic);
+    	a.createCanvas();
+    	try{
+    		for(Card p: a.allCards){
+    			SaveURL.saveImage(p.pic, p.name);
+    		}
+    	}catch(Exception e){}
     	
        
        
@@ -132,6 +143,13 @@ public class App  extends Frame implements Runnable
         
     }
     public void createCanvas(){
+    	JPanel centerPanel = new JPanel();
+    	centerPanel.setLayout(new GridLayout(1, 1));
+    	add("Center", centerPanel);
+    	canvas.setBackground(Color.BLACK);
+    	canvas.repaint();
+    	System.out.println("test");
+    	
         for(int i =0; i<14;i++){
 	         cardButtons[i] = new JButton(i+"");
         }
@@ -167,7 +185,9 @@ public class App  extends Frame implements Runnable
     	      	if(pString.contains("a minion")){}
     	      	//for effect
     	      		if(pString.contains("give")){}
-    	      		if(pString.contains("Taunt")){}
+    	      		if(pString.contains("Taunt")){
+    	      			
+    	      		}
     	      }
 
     public void attack(int aNum, int dNum){
